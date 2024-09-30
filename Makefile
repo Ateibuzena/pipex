@@ -9,7 +9,7 @@ LIBFT = $(LIBFT_DIR)/libft.a
 INCLUDES = -I$(LIBFT_DIR)
 
 SRC_DIR = ./src
-SRCS = $(SRC_DIR)/pipex.c\
+SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/ft_process.c $(SRC_DIR)/ft_utils.c\
 
 OBJ_DIR = ./objs
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
@@ -45,3 +45,4 @@ fclean: clean
 re: fclean all
 
 .PHONY: all clean fclean re
+
