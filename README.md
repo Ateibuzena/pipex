@@ -4,9 +4,6 @@ Pipex is a C project that simulates UNIX pipes, allowing users to connect multip
 ## Summary
 This project will allow you to explore the functionality of a UNIX mechanism you already know through the use of your program.
 
-## Version
-3
-
 ## Table of Contents
 - [I. Introduction](#i-introduction)
 - [II. General Instructions](#ii-general-instructions)
