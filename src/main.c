@@ -24,15 +24,9 @@ int	main(int argc, char **argv, char **env)
 		exit(1);
 	}
 	if (pid == 0)
-	{
-		ft_printf("I'm child process\n");
 		ft_child_process_1(fd, argv, env);
-	}
 	else
-	{
-		ft_printf("I'm father process\n");
 		ft_child_process_2(fd, argv, env);
-	}
 	wait(NULL); /*El motivo para usar wait(NULL) es evitar que el proceso padre continúe
 	ejecutándose antes de que el proceso hijo haya terminado
 	Función wait(): La función wait() hace que el proceso padre espere 

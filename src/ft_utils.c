@@ -3,20 +3,16 @@
 char	*ft_search_way(char *str, char **env, int len)
 {
 	int	i;
-	int	boolean;
 
+	//ft_printf("llego aqui");
 	i = 0;
-	boolean = 0;
 	while (env[i])
 	{
-		if (!ft_strncmp(str, env[i], len)) //los dos strings son iguales
-			boolean = 1;
-		else
-			i++;
+		if (!ft_strncmp(str, env[i], len)) //los dos strings son iguales 4 t54h 69 0
+			return (env[i]);
+		i++;
 	}
-	if (boolean)
-		return (env[i]);
-	return (NULL);
+	return (env[i]);
 }
 
 char	**ft_clean_path(char *path, int	start)
@@ -49,12 +45,10 @@ char	*ft_accessible_path(char **path, char *cmd)
 			return (NULL);
 		path[i] = ft_strjoin(path[i], cmd);
 		if (access(path[i], X_OK) == 0) //comprobando si es ejecutable, el 0 indica exito
-			i = ft_strlen_double(path) - 1; //para salir del bucle; puedo retornar path[i]?
+			return (path[i]); //para salir del bucle; puedo retornar path[i]?
 		free(path[i]);
 		path[i] = NULL;
 		i++;
 	}
-	if (!path[i])
-		return (NULL);
-	return (path[i]);
+	return (NULL);
 }
