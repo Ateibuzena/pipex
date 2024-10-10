@@ -18,8 +18,9 @@ typedef struct s_pipex
 /*SRC/*/
 
 /*ft_process.c*/
-void	ft_child_process_1(int fd[2], char **argv, char **env);
-void	ft_child_process_2(int fd[2], char **argv, char **env);
+void	ft_first_process(int **fds, char **argv, char **env);
+void	ft_middle_process(int **fds, char **argv, char **env, int i);
+void	ft_last_process(int **fds, char **argv, char **env, int argc);
 void	ft_execute_cmd(char *argv, char **env, char *pathname);
 
 /*ft_utils.c*/

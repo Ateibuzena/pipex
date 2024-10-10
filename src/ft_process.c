@@ -33,87 +33,106 @@ void	ft_execute_cmd(char *argv, char **env, char *pathname)
 	exit(127);
 }
 
-void	ft_child_process_1(int fd[2], char **argv, char **env)
+void	ft_first_process(int **fds, char **argv, char **env)
 {
-	int		reading;
-	
+	int	reading;
 
-	//ft_printf("estoy en child_process_1\n");
+	// Cerrar lectura del primer pipe
+	//close(fds[0][0]);
 
-	close(fd[0]); //cerramos fd de lectura para poder escribir en la pipe
+	// Abrir el archivo de entrada
 	reading = open(argv[1], O_RDONLY);
+	//ft_printf("fd de file1: %d", reading);
 	if (reading < 0)
 	{
-		perror("Open fail in reading process\n");
+		perror("Open input file error first");
 		exit(1);
 	}
-	/*La razón por la que se usa dup2() en lugar de dup() radica en la flexibilidad y control que proporciona cada función sobre la duplicación de descriptores de archivo.
-	Diferencias entre dup() y dup2():
-	dup():
-	Sintaxis: int dup(int oldfd);
-	Descripción: dup() duplica el descriptor de archivo oldfd, pero devuelve el primer descriptor de archivo disponible, es decir, crea un nuevo descriptor de archivo que apunta al mismo recurso que oldfd.
-	Uso típico: Si solo quieres duplicar un descriptor de archivo sin preocuparte por cuál será el nuevo descriptor asignado.
-	Desventaja: No tienes control sobre qué número de descriptor de archivo será el nuevo. El sistema operativo asignará automáticamente el primer número de descriptor disponible (el menor número entero mayor que 2).
-	dup2():
-	Sintaxis: int dup2(int oldfd, int newfd);
-	Descripción: dup2() también duplica oldfd, pero en este caso redirige específicamente el descriptor de archivo oldfd para que ocupe el número de descriptor newfd. Si newfd ya estaba en uso, primero cierra newfd y luego lo reutiliza para apuntar al mismo recurso que oldfd.
-	Uso típico: Se usa cuando quieres duplicar un descriptor de archivo en un descriptor específico, como redirigir la entrada estándar (STDIN_FILENO) o la salida estándar (STDOUT_FILENO) hacia un archivo o tubería.
-	Ventaja: Te permite controlar exactamente cuál será el nuevo descriptor de archivo, lo cual es útil en casos donde necesitas que el descriptor de archivo esté asociado a un número específico (como redirigir la entrada estándar, salida estándar o salida de error estándar).*/
-	if (dup2(reading, STDIN_FILENO) == -1) //no leas por entrada, lee de file 1
+
+	// Redirigir la entrada estándar al archivo de entrada
+	if (dup2(reading, STDIN_FILENO) == -1)
 	{
-		perror("Input process fail in reading process\n");
+		perror("Dup2 input error first");
 		exit(1);
 	}
+
+	// Redirigir la salida estándar al primer pipe
+	//ft_printf("pipe 1: %d", fds[0][1]);
+	/*if (dup2(fds[0][1], STDOUT_FILENO) == -1)
+	{
+		perror("Dup2 output error first");
+		exit(1);
+	}*/
+
+	// Cerrar el archivo y el pipe de escritura
 	close(reading);
-	/*Al redirigir STDOUT_FILENO, se cambia la salida de todas las funciones que imprimen en la consola (como printf(), puts(), etc.) para que en su lugar envíen sus datos a otro destino (en este caso, el pipe).
-	Esto significa que todo lo que normalmente se imprimiría en la consola a través de la salida estándar será enviado a fd[1], el extremo de escritura del pipe. Luego, otro proceso o hilo puede leer esos datos desde el extremo de lectura del pipe (fd[0]).*/
-	//PROBLEMITAS EN EL IF ESTE
-	if (dup2(fd[1], STDOUT_FILENO) == -1) //redirigir la salida al fd de escritura
-	{
-		perror("Output process fail in reading process\n");
-		exit(1);
-	}
-	//ft_printf("llegué aqui\n");
-	close(fd[1]);
-	ft_execute_cmd(argv[2], env, NULL); //ejecutamos comando = segundo argumento
+	close(fds[0][1]);
+
+	// Ejecutar el primer comando (argv[2])
+	ft_execute_cmd(argv[2], env, NULL);
 }
 
-void	ft_child_process_2(int fd[2], char **argv, char **env)
+void	ft_middle_process(int **fds, char **argv, char **env, int i)
 {
-	int		writing;
-	char	*pathname;
+	// Cerrar escritura del pipe anterior y lectura del siguiente pipe
+	close(fds[i - 1][1]);
+	close(fds[i][0]);
 
-	//ft_printf("estoy en father_process_2\n");
-	pathname = NULL;
-	close(fd[1]); //cerramos fd escritura
-	writing = (open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0644));
-	/*0644:
-	Este es el valor que establece los permisos del archivo en el sistema de archivos.
-	0644 es una máscara octal que se utiliza para definir los permisos de archivo. Los permisos se representan en un formato octal que controla los derechos de lectura, escritura y ejecución para el usuario (owner), grupo (group), y otros (others).
-	El valor 0644 se desglosa de la siguiente manera:
-	0: Un prefijo octal que indica que es un número en base 8.
-	6: Lectura y escritura para el propietario del archivo (owner) → 4 (lectura) + 2 (escritura) = 6.
-	4: Lectura para el grupo (group).
-	4: Lectura para otros (others).
-	Esto significa que:
-	El propietario del archivo tiene permisos de lectura y escritura.
-	El grupo y otros usuarios tienen solo permisos de lectura.*/
+	// Redirigir la entrada estándar al pipe anterior
+	if (dup2(fds[i - 1][0], STDIN_FILENO) == -1)
+	{
+		perror("Dup2 input error middle");
+		exit(1);
+	}
+
+	// Redirigir la salida estándar al siguiente pipe
+	if (dup2(fds[i][1], STDOUT_FILENO) == -1)
+	{
+		perror("Dup2 output error middle");
+		exit(1);
+	}
+
+	// Cerrar los pipes ya redirigidos
+	close(fds[i - 1][0]);
+	close(fds[i][1]);
+
+	// Ejecutar el comando intermedio (argv[2 + i])
+	ft_execute_cmd(argv[i + 2], env, NULL);
+}
+
+void	ft_last_process(int **fds, char **argv, char **env, int argc)
+{
+	int	writing;
+
+	// Cerrar escritura del último pipe
+	close(fds[argc - 5][1]);
+
+	// Abrir el archivo de salida
+	writing = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (writing < 0)
 	{
-		perror("Open fail in wrinting process\n");
+		perror("Open output file error last");
 		exit(1);
 	}
-	if (dup2(fd[0], STDIN_FILENO) == -1) // fallo al escribir la entrada por teclado en el pipe de lectura
+
+	// Redirigir la entrada estándar al último pipe
+	if (dup2(fds[argc - 5][0], STDIN_FILENO) == -1)
 	{
-		perror("Input fail in writing process\n");
+		perror("Dup2 input error last");
 		exit(1);
 	}
-	close(fd[0]);
+
+	// Redirigir la salida estándar al archivo de salida
 	if (dup2(writing, STDOUT_FILENO) == -1)
 	{
-		perror("Output fail in writing process\n");
+		perror("Dup2 output error last");
 		exit(1);
 	}
+
+	// Cerrar el pipe de lectura y el archivo de salida
+	close(fds[argc - 5][0]);
 	close(writing);
-	ft_execute_cmd(argv[3], env, pathname);
+
+	// Ejecutar el último comando (argv[argc - 2])
+	ft_execute_cmd(argv[argc - 2], env, NULL);
 }
