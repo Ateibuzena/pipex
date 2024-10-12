@@ -1,5 +1,31 @@
 #include "../pipexft.h"
 
+void ft_close_pipes(int **fds, int num_pipes, int i) 
+{
+	int	j;
+
+	j = i;
+	while (j < num_pipes)
+	{
+		close(fds[j][0]);
+        close(fds[j][1]);
+		j++;
+	}
+}
+
+void	ft_free_pipes(int **fds, int num_pipes)
+{
+	int	i;
+
+	i = 0;
+	while (i < num_pipes)
+	{
+		free(fds[i]);
+		i++;
+	}
+	free(fds);
+}
+
 char	*ft_search_way(char *str, char **env, int len)
 {
 	int	i;

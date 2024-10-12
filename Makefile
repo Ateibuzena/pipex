@@ -1,7 +1,7 @@
 # Variables
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
-
+CFLAGS = -Wall -Wextra -Werror 
+# -fsanitize=address
 LIBFT_DIR = /home/azubieta/sgoinfre/azubieta/utils/libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
