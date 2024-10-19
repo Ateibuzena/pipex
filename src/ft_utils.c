@@ -15,13 +15,10 @@ void ft_close_pipes(int **fds, int num_pipes, int i)
 
 void	ft_free_pipes(int **fds, int num_pipes)
 {
-	int	i;
-
-	i = 0;
-	while (i < num_pipes)
+	while (num_pipes)
 	{
-		free(fds[i]);
-		i++;
+		free(fds[num_pipes]);
+		num_pipes--;
 	}
 	free(fds);
 }

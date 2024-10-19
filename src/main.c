@@ -1,113 +1,138 @@
-				
 #include "../pipexft.h"
 
-int main(int argc, char **argv, char **env) 
+static	void	ft_perror(char *str)
 {
-    int **fds;
-    int pid;
-	int	i;
-	int	j;
-	int	num_pipes;
-    int status;
-    int exit_code = 0;  // Código del proceso fallido
-    pid_t *pids;        // Array para almacenar los PIDs de los procesos
+	perror(str);
+	exit(EXIT_FAILURE);
+}
 
-    if (argc < 5) {
+static void	ft_init(t_pipex *pipex, int argc)
+{
+	int		i;
+
+	pipex->np = argc - 4;
+	if (argc < 5) 
+	{
         ft_printf("This program must be executed like:\n");
         ft_printf("./pipex file1 command1 command2 ... commandN file2\n");
         exit(EXIT_FAILURE);
     }
-    num_pipes = argc - 4;
-    // Asignar memoria para las tuberías y los PIDs
-    fds = (int **)malloc(num_pipes * sizeof(int *));
-    pids = (pid_t *)malloc((num_pipes + 1) * sizeof(pid_t));  // Un proceso por comando
-    if (!fds || !pids) {
-        perror("Malloc failed");
-        exit(EXIT_FAILURE);
-    }
+    // memoria para np pipes
+    pipex->pipes = (int **)malloc(pipex->np * sizeof(int *));
+    if (!pipex->pipes) 
+		ft_perror("Malloc failed: pipes\n");
 	i = 0;
-    while (i < num_pipes) 
+    while (i < pipex->np) 
 	{
-        fds[i] = (int *)malloc(2 * sizeof(int));
-        if (!fds[i] || pipe(fds[i]) == -1)
-		{
-            perror("Pipe error");
-            exit(EXIT_FAILURE);
-        }
+		// memoria para los pipes de cada pipe
+        pipex->pipes[i] = (int *)malloc(2 * sizeof(int));
+        if (!pipex->pipes[i] || pipe(pipex->pipes[i]) == -1)
+			ft_perror("Pipe error: pipes[i]\n");
 		i++;
     }
-    // Crear el primer proceso para el primer comando
-    pid = fork();
-    if (pid < 0) {
-        perror("Fork error");
-        exit(EXIT_FAILURE);
-    }
-    if (pid == 0) 
-	{
-        ft_close_pipes(fds, num_pipes, 1);
-        ft_first_process(fds, argv, env);  // Proceso hijo para el primer comando
-    }
-	else
-        pids[0] = pid;  // Guardar el PID del primer proceso
-    // Crear procesos intermedios
-	i = 1;
-    while(i < num_pipes) 
-	{
-        pid = fork();
-        if (pid < 0) 
-		{
-            perror("Fork error");
-            exit(EXIT_FAILURE);
-        }
-        if (pid == 0) 
-		{
-		   	j = 0;
-			while (j < num_pipes)
-			{
-				if (j != i - 1)
-					close(fds[j][0]);
-                if (j != i)
-					close(fds[j][1]);
-				j++;
-			}
-            ft_middle_process(fds, argv, env, i);
-        }
-		else
-            pids[i] = pid;  // Guardar el PID del proceso intermedio
-		i++;
-    }
-    // Crear el último proceso para el último comando
-    pid = fork();
-    if (pid < 0) 
-	{
-        perror("Fork error");
-        exit(EXIT_FAILURE);
-    }
-    if (pid == 0) 
-	{
-        ft_close_pipes(fds, num_pipes, 0);
-        ft_last_process(fds, argv, env, argc);
-    }
-	else
-        pids[num_pipes] = pid;  // Guardar el PID del último proceso
+	// memoria para los np pids
+	pipex->pids = (pid_t *)malloc((pipex->np) * sizeof(pid_t)); // Un proceso por comando
+    if (!pipex->pids) 
+		ft_perror("Malloc failed: pids\n");
+	pipex->i = 0;
+}
 
-    // Cerrar las tuberías en el proceso padre
-	ft_close_pipes(fds, num_pipes, 0);
+static void	ft_print_array_double(t_pipex *pipex)
+{
+	int	i;
+
 	i = 0;
-    // Esperar a todos los procesos hijos
-	while(i <= num_pipes)
+	while (i < pipex->np)
 	{
-		waitpid(pids[i], &status, 0);
-		if (WIFEXITED(status) && WEXITSTATUS(status) != 0) 
-		{
-			fprintf(stderr, "Error in command %d\n", i + 1);
-			exit_code = WEXITSTATUS(status);
-		}
+		ft_printf("pipe[%d], fd[0]: %d, fd[1]: %d\n",
+				i, (pipex->pipes)[i][0], (pipex->pipes)[i][1]);
 		i++;
 	}
-	ft_free_pipes(fds, num_pipes);
-    free(pids);
-	if (exit_code == 0)
-		return (EXIT_SUCCESS);
-	return (exit_code);
+	ft_printf("procesos llevados a cabo: %d\n", pipex->i);
+	ft_printf("procesos totales a realizar %d\n:", pipex->np);
+}
+
+static void	ft_first_proces(t_pipex *pipex, char *argv[], char **env)
+{
+	int	fd_infile;
+
+	ft_printf("hola2\n");
+	(pipex->pids)[pipex->i] = fork();
+	if ((pipex->pids)[pipex->i] < 0)
+		ft_perror("Fork error: first_process\n");
+	if ((pipex->pids)[pipex->i] == 0)
+	{
+		fd_infile = open(argv[(pipex->i + 1)], O_RDONLY);
+		if (fd_infile < 0)
+			ft_perror("Open failed: first input\n");
+		if (dup2(fd_infile, STDIN_FILENO) == -1)
+			ft_perror("Dup2 failed: \n");
+		ft_printf("hola3\n");
+		ft_printf("fds: %d\n", pipex->pipes[pipex->i][1]);
+		if (dup2(pipex->pipes[pipex->i][1], STDOUT_FILENO) == -1)
+			ft_perror("Dup2 failed: first output\n");
+		ft_execute_cmd(pipex, argv[(pipex->i + 2)], env, NULL);
+		close(pipex->pipes[pipex->i][0]);
+		close((pipex->pipes)[pipex->i][0]);
+		pipex->i += 1;
+		ft_print_array_double(pipex);
+	}
+}
+
+static void	ft_middle_proces(t_pipex *pipex, char *argv[], char **env)
+{
+	(pipex->pids)[pipex->i] = fork();
+	if ((pipex->pids)[pipex->i] < 0)
+		ft_perror("Fork error: middle_process\n");
+	close(pipex->pipes[pipex->i][0]);
+	if (dup2(pipex->pipes[(pipex->i - 1)][0], STDIN_FILENO) == -1)
+		ft_perror("Dup2 failed: middle input\n");
+	if (dup2(pipex->pipes[pipex->i][1], STDOUT_FILENO) == -1)
+		ft_perror("Dup2 failed: middle output\n");
+	ft_execute_cmd(pipex, argv[(pipex->i + 2)], env, NULL);
+	close((pipex->pipes)[pipex->i][1]);
+	pipex->i += 1;
+	ft_print_array_double(pipex);
+}
+
+static void	ft_last_proces(t_pipex *pipex, char *argv[], char **env)
+{
+	int	fd_outfile;
+
+	(pipex->pids)[pipex->i] = fork();
+	if ((pipex->pids)[pipex->i] < 0)
+		ft_perror("Fork error: last_process\n");
+	if (dup2((pipex->pipes)[(pipex->i - 2)][0], STDIN_FILENO) == -1)
+		ft_perror("Dup2 failed: last input\n");
+	fd_outfile = open(argv[(pipex->i + 2)], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (dup2(fd_outfile, STDOUT_FILENO) == -1)
+		ft_perror("Dup2 failed: last output\n");
+	ft_execute_cmd(pipex, argv[(pipex->i + 2)], env, NULL);
+	close(fd_outfile);
+	close((pipex->pipes)[(pipex->i - 2)][0]);
+	pipex->i += 1;
+	ft_print_array_double(pipex);
+}
+
+int main(int argc, char **argv, char **env) 
+{
+	t_pipex	*pipex;
+	
+	pipex = malloc(sizeof(t_pipex));
+	if(!pipex)
+	{
+		perror("Malloc filed: pipex\n");
+		exit(EXIT_FAILURE);
+	}
+	ft_init(pipex, argc);
+	ft_printf("hola1\n");
+	ft_print_array_double(pipex);
+	// primer proceso:
+	ft_first_proces(pipex, argv, env);
+	// procesos intermedios:
+	while (pipex->i < pipex->np)
+		ft_middle_proces(pipex, argv, env);
+	// último proceso:
+	ft_last_proces(pipex, argv, env);
+	return (0);
 }

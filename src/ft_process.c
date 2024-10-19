@@ -8,13 +8,9 @@ void	ft_exit_error(char *str)
 	exit(127);
 }
 
-void ft_execute_cmd(char *argv, char **env, char *pathname) {
-    t_pipex *pipex = malloc(sizeof(t_pipex));
-    if (!pipex) {
-        perror("Memory allocation failed");
-        exit(1);
-    }
-
+void ft_execute_cmd(t_pipex *pipex, char *argv, char **env, char *pathname)
+{
+    
     pipex->commands = ft_split(argv, ' ');
     pipex->found_way = ft_search_way("PATH=", env, 4);
     pipex->clean_paths = ft_clean_path(pipex->found_way, 5);
@@ -46,7 +42,7 @@ void ft_execute_cmd(char *argv, char **env, char *pathname) {
     exit(1);
 }
 
-
+/*
 void ft_first_process(int **fds, char **argv, char **env) {
     int reading = open(argv[1], O_RDONLY);
     if (reading < 0) {
@@ -67,9 +63,9 @@ void ft_first_process(int **fds, char **argv, char **env) {
     //close(fds[0][0]);  // Cerrar la lectura que no usamos
     close(fds[0][1]);
 
-    ft_execute_cmd(argv[2], env, NULL);
-}
-
+    ft_execute_cmd( argv[2], env, NULL);
+}*/
+/*
 void ft_middle_process(int **fds, char **argv, char **env, int i) {
     if (dup2(fds[i - 1][0], STDIN_FILENO) == -1) {
         perror("Dup2 input error");
@@ -86,8 +82,8 @@ void ft_middle_process(int **fds, char **argv, char **env, int i) {
     close(fds[i][1]);
 
     ft_execute_cmd(argv[i + 2], env, NULL);
-}
-
+}*/
+/*
 void ft_last_process(int **fds, char **argv, char **env, int argc) {
     int writing = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (writing < 0) {
@@ -109,4 +105,4 @@ void ft_last_process(int **fds, char **argv, char **env, int argc) {
     close(fds[argc - 5][0]);
 
     ft_execute_cmd(argv[argc - 2], env, NULL);
-}
+}*/

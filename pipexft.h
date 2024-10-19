@@ -10,18 +10,23 @@
 
 typedef struct s_pipex
 {
+	int		np;
+	int		i;
+	int		**pipes;
+	pid_t	*pids;
 	char	*found_way;
 	char	**clean_paths;
 	char	**commands;
+	
 } t_pipex;
 
 /*SRC/*/
 
 /*ft_process.c*/
-void	ft_first_process(int **fds, char **argv, char **env);
+/*void	ft_first_process(int **fds, char **argv, char **env);
 void	ft_middle_process(int **fds, char **argv, char **env, int i);
-void	ft_last_process(int **fds, char **argv, char **env, int argc);
-void	ft_execute_cmd(char *argv, char **env, char *pathname);
+void	ft_last_process(int **fds, char **argv, char **env, int argc);*/
+void	ft_execute_cmd(t_pipex *pipex, char *argv, char **env, char *pathname);
 
 /*ft_utils.c*/
 void	ft_close_pipes(int **fds, int num_pipes, int i);
