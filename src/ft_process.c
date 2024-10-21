@@ -1,108 +1,74 @@
 #include "../pipexft.h"
 
-void	ft_exit_error(char *str)
+void ft_child_process(int input_fd, int output_fd)
 {
-	write(2, "Command not found:  ", 19);
-	write(2, str, ft_strlen(str));
-	write(2, "\n", 1);
-	exit(127);
+	if (input_fd != 0) 
+	{  // Redirigir stdin si es necesario
+		if (dup2(input_fd, STDIN_FILENO) == -1)
+			ft_perror("Dup2 failed: input\n");
+		close(input_fd);
+	}
+	if (output_fd != 1) 
+	{  // Redirigir stdout si es necesario
+		if (dup2(output_fd, STDOUT_FILENO) == -1)
+			ft_perror("Dup2 failed: output\n");
+		close(output_fd);
+	}
 }
 
-void ft_execute_cmd(t_pipex *pipex, char *argv, char **env, char *pathname)
+void	ft_first_process(char **argv, t_pipex *pipex, char **env)
 {
-    
-    pipex->commands = ft_split(argv, ' ');
-    pipex->found_way = ft_search_way("PATH=", env, 4);
-    pipex->clean_paths = ft_clean_path(pipex->found_way, 5);
+	int	infile;
 
-    pathname = ft_accessible_path(pipex->clean_paths, pipex->commands[0]);
-
-    // Si no se encuentra un path accesible, buscamos en PWD
-    if (!pathname) {
-        ft_freedouble(pipex->clean_paths);
-        pipex->found_way = ft_search_way("PWD=", env, 3);
-        pipex->clean_paths = ft_clean_path(pipex->found_way, 4);
-
-        pathname = ft_accessible_path(pipex->clean_paths, pipex->commands[0]);
-        if (!pathname) {
-            ft_freedouble(pipex->clean_paths);
-            ft_freedouble(pipex->commands);
-            free(pipex);
-            ft_exit_error(argv);  // Termina el programa si no se encuentra el comando
-        }
-    }
-
-    execve(pathname, pipex->commands, env);  // Ejecutamos el comando
-
-    // Si `execve` falla, liberamos memoria y salimos con error
-    perror("Execution failed");
-    ft_freedouble(pipex->clean_paths);
-    ft_freedouble(pipex->commands);
-    free(pipex);
-    exit(1);
+	infile = open(argv[1], O_RDONLY);
+	if (infile < 0)
+		ft_perror("Open failed: infile");
+	pipex->pids[0] = fork();
+	if (pipex->pids[0] < 0)
+		ft_perror("Fork error: first_process\n");
+	if (pipex->pids[0] == 0)
+	{
+		close(pipex->pipes[0][READ]);  // No necesitamos el extremo de lectura
+		ft_child_process(infile, pipex->pipes[0][WRITE]);
+		fprintf(stderr, "first_comand: %s\n", argv[2]);
+		ft_execute_cmd(pipex, argv[2], env, NULL);
+	}
+	close(infile);  // El padre cierra infile
+	close(pipex->pipes[0][WRITE]);  // Cierra el extremo de escritura del primer pipe
 }
 
-/*
-void ft_first_process(int **fds, char **argv, char **env) {
-    int reading = open(argv[1], O_RDONLY);
-    if (reading < 0) {
-        perror("Open input file error");
-        exit(1);
-    }
+int	ft_middle_process(char **argv, t_pipex *pipex, char **env)
+{
+	int	i;
 
-    if (dup2(reading, STDIN_FILENO) == -1) {
-        perror("Dup2 input error");
-        exit(1);
-    }
-    if (dup2(fds[0][1], STDOUT_FILENO) == -1) {
-        perror("Dup2 output error");
-        exit(1);
-    }
+	i = 1;
+	while (i < (pipex->n - 1))
+	{
+		pipex->pids[i] = fork();
+		if (pipex->pids[i] < 0)
+			ft_perror("Fork error: middle_process\n");
+		if (pipex->pids[i] == 0)
+		{
+			close(pipex->pipes[i][READ]);
+			ft_child_process(pipex->pipes[i - 1][READ], pipex->pipes[i][WRITE]);
+			fprintf(stderr, "middle_comand: %s\n", argv[i + 2]);
+			ft_execute_cmd(pipex, argv[i + 2], env, NULL);
+		}
+		close(pipex->pipes[i - 1][READ]);  // El padre cierra los extremos usados
+		close(pipex->pipes[i][WRITE]);
+		i++;
+	}
+	return (i);
+}
 
-    close(reading);
-    //close(fds[0][0]);  // Cerrar la lectura que no usamos
-    close(fds[0][1]);
+void	ft_last_process(int	i, int argc, char **argv, t_pipex *pipex, char **env)
+{
+	int	outfile;
 
-    ft_execute_cmd( argv[2], env, NULL);
-}*/
-/*
-void ft_middle_process(int **fds, char **argv, char **env, int i) {
-    if (dup2(fds[i - 1][0], STDIN_FILENO) == -1) {
-        perror("Dup2 input error");
-        exit(1);
-    }
-    if (dup2(fds[i][1], STDOUT_FILENO) == -1) {
-        perror("Dup2 output error");
-        exit(1);
-    }
-
-    close(fds[i - 1][0]);
-    //close(fds[i - 1][1]);
-    //close(fds[i][0]);
-    close(fds[i][1]);
-
-    ft_execute_cmd(argv[i + 2], env, NULL);
-}*/
-/*
-void ft_last_process(int **fds, char **argv, char **env, int argc) {
-    int writing = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (writing < 0) {
-        perror("Open output file error");
-        exit(1);
-    }
-	close(fds[argc - 5][1]);  // Cerrar el pipe de escritura anterior
-
-    if (dup2(fds[argc - 5][0], STDIN_FILENO) == -1) {
-        perror("Dup2 input error");
-        exit(1);
-    }
-    if (dup2(writing, STDOUT_FILENO) == -1) {
-        perror("Dup2 output error");
-        exit(1);
-    }
-
-    close(writing);
-    close(fds[argc - 5][0]);
-
-    ft_execute_cmd(argv[argc - 2], env, NULL);
-}*/
+	outfile = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (outfile < 0)
+		ft_perror("Open failed: outfile");
+	ft_child_process(pipex->pipes[i - 1][READ], outfile);
+	fprintf(stderr, "last_comand: %s\n", argv[argc - 2]);
+	ft_execute_cmd(pipex, argv[argc - 2], env, NULL);
+}
