@@ -1,17 +1,16 @@
-#include "/home/azubieta/sgoinfre/azubieta/actual/pipex_github_bonus/pipexft.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipex_bonus.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/10/23 17:56:26 by azubieta          #+#    #+#             */
+/*   Updated: 2024/10/23 18:38:11 by azubieta         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-void	ft_waitpid(t_pipex *pipex)
-{
-	// Esperar a los hijos
-	int	i;
-
-	i = 0;
-    while (i < (pipex->n - 1))
-	{
-        waitpid(pipex->pids[i], NULL, 0);
-		i++;
-	}
-}
+#include "../../pipexft.h"
 
 static void	ft_redirection(int argc, char **argv, t_pipex *pipex, char **env)
 {
@@ -23,39 +22,77 @@ static void	ft_redirection(int argc, char **argv, t_pipex *pipex, char **env)
 	if (outfile < 0 || infile < 0)
 		ft_perror("Open failed: outfile");
 	ft_child_process(infile, outfile);
-	fprintf(stderr, "unique_comand: %s\n", argv[argc - 2]);
 	ft_execute_cmd(pipex, argv[2], env, NULL);
+}
+
+static void	ft_check_args(int argc, t_pipex *pipex)
+{
+	if (pipex->i)
+	{
+		if (argc < MIN_ARGS || argc > 5)
+		{
+			free(pipex);
+			ft_perror("./pipex file1 'command1' 'command2' file2");
+		}
+	}
+	else
+	{
+		if (argc < MIN_ARGS)
+		{
+			free(pipex);
+			ft_perror("./pipex file1 'command1' 'command2'...'commandN' file2");
+		}
+	}
+}
+
+static void	ft_check_comands(int argc, char **argv, t_pipex *pipex, char **env)
+{
+	char	*pathname;
+
+	pipex->i = 1;
+	pipex->count = 0;
+	while ((pipex->i)++ < (argc - 2))
+	{
+		pipex->commands = ft_split(argv[pipex->i], ' ');
+		pipex->found_way = ft_search_way("PATH=", env, 4);
+		pipex->clean_paths = ft_clean_path(pipex->found_way, 5);
+		pathname = ft_accessible_path(pipex->clean_paths, pipex->commands[0]);
+		ft_freedouble(pipex->clean_paths);
+		if (!pathname)
+		{
+			pipex->found_way = ft_search_way("PWD=", env, 3);
+			pipex->clean_paths = ft_clean_path(pipex->found_way, 4);
+			pathname = ft_accessible_path(pipex->clean_paths,
+					pipex->commands[0]);
+			ft_freedouble(pipex->clean_paths);
+			if (!pathname)
+				ft_not_found(argv[pipex->i], &(pipex->count));
+		}
+		(free(pathname), ft_freedouble(pipex->commands));
+	}
+	if (pipex->count)
+		(free(pipex), ft_perror("Path failed: comands"));
 }
 
 int	main(int argc, char **argv, char **env)
 {
 	t_pipex	*pipex;
-	int		i;
 
-	//fprintf(stderr, "Chequeo argumentos\n");
-	ft_check_pipex(argc);
-
-	//fprintf(stderr, "Inicializacion de estructura\n");
 	pipex = malloc(sizeof(t_pipex));
-	if(!pipex)
-		ft_perror("Malloc filed: pipex\n");
+	if (!pipex)
+		ft_perror("Malloc filed: pipex");
+	pipex->i = 0;
+	ft_check_args(argc, pipex);
+	ft_check_comands(argc, argv, pipex, env);
 	if (argc > 4)
 	{
 		ft_init(pipex, argc);
-
-		//fprintf(stderr, "Primer proceso hijo\n");
 		ft_first_process(argv, pipex, env);
-		
-		//fprintf(stderr, "Procesos intermedios\n");
-		i = ft_middle_process(argv, pipex, env);
-
-		//fprintf(stderr, "Ultimo proceso\n");
-		ft_last_process(i, argc, argv, pipex, env);
+		pipex->i = ft_middle_process(argv, pipex, env);
+		ft_last_process(argc, argv, pipex, env);
 	}
 	else if (argc == 4)
 		ft_redirection(argc, argv, pipex, env);
-	// Esperar a los hijos
 	ft_waitpid(pipex);
 	return (0);
 }
-
