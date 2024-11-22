@@ -1,7 +1,19 @@
-#ifndef PIPEXFT_H
-#define PIPEXFT_H
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipexft.h                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/22 22:13:34 by azubieta          #+#    #+#             */
+/*   Updated: 2024/11/22 23:17:01 by azubieta         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-# include "/home/azubieta/sgoinfre/azubieta/utils/libft/libft.h"
+#ifndef PIPEXFT_H
+# define PIPEXFT_H
+
+# include "../../Utils/libft/libft.h"
 # include <errno.h>
 # include <sys/wait.h>
 # include <aio.h>
@@ -12,30 +24,23 @@
 # define READ 0
 # define WRITE 1
 
-/*typedef struct s_pipex
+typedef struct s_par
 {
-	int		np;
-	int		i;
-	int		status;
-	int		exit_code;
-	int		**pipes;
-	pid_t	*pids;
-	char	*found_way;
-	char	**clean_paths;
-	char	**commands;
-
-} t_pipex;*/
+	int	i;
+	int	j;
+}	t_par;
 
 typedef struct s_pipex
 {
 	int		n;
+	int		i;
+	int		count;
 	int		**pipes;
 	pid_t	*pids;
 	char	*found_way;
 	char	**clean_paths;
 	char	**commands;
-
-} t_pipex;
+}	t_pipex;
 
 /*SRC/*/
 
@@ -43,23 +48,24 @@ typedef struct s_pipex
 void	ft_child_process(int input_fd, int output_fd);
 void	ft_first_process(char **argv, t_pipex *pipex, char **env);
 int		ft_middle_process(char **argv, t_pipex *pipex, char **env);
-void	ft_last_process(int	i, int argc, char **argv, t_pipex *pipex, char **env);
+void	ft_last_process(int argc, char **argv, t_pipex *pipex, char **env);
+void	ft_waitpid(t_pipex *pipex);
 
 /*ft_execute.c*/
-char	*ft_search_way(char *str, char **env, int len);
-char	**ft_clean_path(char *path, int	start);
-char	*ft_accessible_path(char **path, char *cmd);
+char	*ft_search_way(const char *key, char **env, size_t len);
+char	**ft_clean_path(char *path_value);
+char	*ft_accessible_path(char **paths, char *command);
 void	ft_execute_cmd(t_pipex *pipex, char *argv, char **env, char *pathname);
 
 /*ft_utils.c*/
-void	ft_check_pipex(int	argc);
-void	ft_free_pipes(int **fds, int num_pipes);
-void	ft_exit_error(char *str);
-void	ft_perror(const char *str);
+int		ft_here_doc(char *delimiter);
 void	ft_init(t_pipex *pipex, int argc);
+void	ft_free_pipex(t_pipex *pipex);
+void	ft_perror(const char *str);
+void	ft_not_found(char *str, t_pipex *pipex);
 
-/*main.c*/
-void	ft_waitpid(t_pipex *pipex);
-
+/*ft_parse.c*/
+char 	*ft_extract_quoted(char **argv, char quote);
+char 	*ft_extract_word(char **argv);
 
 #endif

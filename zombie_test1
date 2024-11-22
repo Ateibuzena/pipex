@@ -1,0 +1,13 @@
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root     1004010  0.0  0.0      0     0 ?        Z    Oct17   0:00 [snap] <defunct>
+root     1645156  0.0  0.0      0     0 ?        Z    Oct21   0:00 [snap] <defunct>
+root     1645929  0.0  0.0      0     0 ?        Z    Oct21   0:00 [snap] <defunct>
+root     1647517  0.0  0.0      0     0 ?        Z    Oct21   0:00 [snap] <defunct>
+root     2063053  0.0  0.0      0     0 ?        Z    Nov20   0:00 [snap] <defunct>
+root     2063148  0.0  0.0      0     0 ?        Z    Nov20   0:00 [snap] <defunct>
+root     2063297  0.0  0.0      0     0 ?        Z    Nov20   0:00 [snap] <defunct>
+root     2063525  0.0  0.0      0     0 ?        Z    Nov20   0:00 [snap] <defunct>
+root     2064657  0.0  0.0      0     0 ?        Z    Nov20   0:00 [snap] <defunct>
+root     2522540  0.0  0.0      0     0 ?        Z    Nov07   0:00 [snap] <defunct>
+azubieta 3046334  0.0  0.0 33589700 2396 ?       Sl   20:09   0:00 /snap/slack/176/usr/lib/slack/chrome_crashpad_handler --monitor-self-annotation=ptype=crashpad-handler --no-upload-gzip --database=/home/azubieta/snap/slack/176/.config/Slack/Crashpad --url=https://slack.com/apps/sentryproxy/api/5277886/minidump/?sentry_key=fd30fe469dbf4aec9db40548e5acf91e --annotation=_productName=Slack --annotation=_version=4.41.98 --annotation=lsb-release=Ubuntu Core 18 --annotation=plat=Linux --annotation=prod=Electron --annotation=sentry___initialScope={"release":"Slack@4.41.98","environment":"production","user":{"id":"ab551748-7553-4d78-9a3a-b8bfa927ffd8"},"tags":{"uuid":"ab551748-7553-4d78-9a3a-b8bfa927ffd8"},"extra":{"sessionId":"YWI1NTE3NDgtNzU1My00ZDc4LTlhM2EtYjhiZmE5MjdmZmQ4XzE3MzIzMDI1NzA3MjI="}} --annotation=ver=33.2.0 --initial-client-fd=42 --shared-client-connection
+azubieta 3112426  0.0  0.0      0     0 pts/0    Z+   23:28   0:00 [sleep] <defunct>

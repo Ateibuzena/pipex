@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:37:22 by azubieta          #+#    #+#             */
-/*   Updated: 2024/10/23 17:42:37 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/22 22:32:33 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,26 +32,35 @@ void	ft_first_process(char **argv, t_pipex *pipex, char **env)
 {
 	int	infile;
 
-	infile = open(argv[1], O_RDONLY);
+	if (ft_strcmp(argv[1], "here_doc") != 0)
+		infile = ft_here_doc(argv[2]);
+	else
+		infile = open(argv[1], O_RDONLY);
 	if (infile < 0)
-		ft_perror("Open failed: infile");
+		(ft_free_pipex(pipex), ft_perror("Open failed: infile"));
 	pipex->pids[0] = fork();
 	if (pipex->pids[0] < 0)
-		ft_perror("Fork error: first_process\n");
+		(ft_free_pipex(pipex), ft_perror("Fork error: first_process\n"));
 	if (pipex->pids[0] == 0)
 	{
 		close(pipex->pipes[0][READ]);
 		ft_child_process(infile, pipex->pipes[0][WRITE]);
-		ft_execute_cmd(pipex, argv[2], env, NULL);
+		ft_execute_cmd(pipex, argv[1 + pipex->i], env, NULL);
 	}
 	close(infile);
+	if (ft_strcmp(argv[1], "here_doc") != 0)
+		unlink("../temporal.txt");
 	close(pipex->pipes[0][WRITE]);
 }
 
 int	ft_middle_process(char **argv, t_pipex *pipex, char **env)
 {
 	int	i;
+	int	j;
 
+	j = 0;
+	if (ft_strcmp(argv[1], "here_doc") != 0)
+		j = 1;
 	i = 1;
 	while (i < (pipex->n - 1))
 	{
@@ -62,7 +71,7 @@ int	ft_middle_process(char **argv, t_pipex *pipex, char **env)
 		{
 			close(pipex->pipes[i][READ]);
 			ft_child_process(pipex->pipes[i - 1][READ], pipex->pipes[i][WRITE]);
-			ft_execute_cmd(pipex, argv[i + 2], env, NULL);
+			ft_execute_cmd(pipex, argv[i + j + 2], env, NULL);
 		}
 		close(pipex->pipes[i - 1][READ]);
 		close(pipex->pipes[i][WRITE]);
@@ -75,12 +84,15 @@ void	ft_last_process(int argc, char **argv, t_pipex *pipex, char **env)
 {
 	int	outfile;
 
-	outfile = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (ft_strcmp(argv[1], "here_doc") != 0)
+		outfile = open(argv[argc - 1], O_WRONLY | O_CREAT | O_APPEND, 0644);
+	else
+		outfile = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (outfile < 0)
-		ft_perror("Open failed: outfile");
+		(ft_free_pipex(pipex), ft_perror("Open failed: outfile"));
 	pipex->pids[pipex->i] = fork();
 	if (pipex->pids[pipex->i] < 0)
-		ft_perror("Fork error: first_process\n");
+		(ft_free_pipex(pipex), ft_perror("Fork error: first_process\n"));
 	if (pipex->pids[pipex->i] == 0)
 	{
 		ft_child_process(pipex->pipes[pipex->i - 1][READ], outfile);

@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:55:10 by azubieta          #+#    #+#             */
-/*   Updated: 2024/10/23 18:38:19 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/22 23:33:01 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,51 +27,11 @@ static void	ft_redirection(int argc, char **argv, t_pipex *pipex, char **env)
 
 static void	ft_check_args(int argc, t_pipex *pipex)
 {
-	if (pipex->i)
+	if (argc < MIN_ARGS || argc > 5)
 	{
-		if (argc < MIN_ARGS || argc > 5)
-		{
-			free(pipex);
-			ft_perror("./pipex file1 'command1' 'command2' file2");
-		}
+		free(pipex);
+		ft_perror("./pipex file1 'command1' 'command2' file2");
 	}
-	else
-	{
-		if (argc < MIN_ARGS)
-		{
-			free(pipex);
-			ft_perror("./pipex file1 'command1' 'command2'...'commandN' file2");
-		}
-	}
-}
-
-static void	ft_check_comands(int argc, char **argv, t_pipex *pipex, char **env)
-{
-	char	*pathname;
-
-	pipex->i = 1;
-	pipex->count = 0;
-	while ((pipex->i)++ < (argc - 2))
-	{
-		pipex->commands = ft_split(argv[pipex->i], ' ');
-		pipex->found_way = ft_search_way("PATH=", env, 4);
-		pipex->clean_paths = ft_clean_path(pipex->found_way, 5);
-		pathname = ft_accessible_path(pipex->clean_paths, pipex->commands[0]);
-		ft_freedouble(pipex->clean_paths);
-		if (!pathname)
-		{
-			pipex->found_way = ft_search_way("PWD=", env, 3);
-			pipex->clean_paths = ft_clean_path(pipex->found_way, 4);
-			pathname = ft_accessible_path(pipex->clean_paths,
-					pipex->commands[0]);
-			ft_freedouble(pipex->clean_paths);
-			if (!pathname)
-				ft_not_found(argv[pipex->i], &(pipex->count));
-		}
-		(free(pathname), ft_freedouble(pipex->commands));
-	}
-	if ((pipex->count))
-		(free(pipex), ft_perror("Path failed: comands"));
 }
 
 int	main(int argc, char **argv, char **env)
@@ -81,9 +41,8 @@ int	main(int argc, char **argv, char **env)
 	pipex = malloc(sizeof(t_pipex));
 	if (!pipex)
 		ft_perror("Malloc filed: pipex");
-	pipex->i = 1;
 	ft_check_args(argc, pipex);
-	ft_check_comands(argc, argv, pipex, env);
+	pipex->i = 1;
 	if (argc > 4)
 	{
 		ft_init(pipex, argc);

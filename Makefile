@@ -2,7 +2,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 
-LIBFT_DIR = /home/azubieta/sgoinfre/azubieta/utils/libft
+LIBFT_DIR = /home/azubieta/sgoinfre/azubieta/Utils/libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
 
@@ -13,6 +13,7 @@ SRCS = $(SRC_DIR)/pipex.c\
 		$(SRC_DIR)/ft_execute.c\
 		$(SRC_DIR)/ft_process.c\
 		$(SRC_DIR)/ft_utils.c\
+		$(SRC_DIR)/ft_parse.c\
 
 OBJ_DIR = ./objs
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
@@ -25,6 +26,7 @@ BONUS_SRCS = $(BONUS_DIR)/bonus/pipex_bonus.c\
 			$(BONUS_DIR)/ft_execute.c\
 			$(BONUS_DIR)/ft_process.c\
 			$(BONUS_DIR)/ft_utils.c\
+			$(BONUS_DIR)/ft_parse.c\
 
 BONUS_OBJS = $(BONUS_SRCS:$(BONUS_DIR)/%.c=$(OBJ_DIR_BONUS)/%.o)
 #BONUS_OBJS = $(BONUS_SRCS:./%.c=$(OBJ_DIR)/%.o)

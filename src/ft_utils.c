@@ -6,25 +6,33 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:43:13 by azubieta          #+#    #+#             */
-/*   Updated: 2024/10/23 18:03:18 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/22 22:38:25 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../pipexft.h"
 
-void	ft_free_pipex(t_pipex *pipex)
+int	ft_here_doc(char *delimiter)
 {
-	int	i;
+	char	*line;
+	int		temp_pipe[2];
 
-	i = 0;
-	free(pipex->pids);
-	while (i < pipex->n)
+	if (pipe(temp_pipe) < 0)
+		ft_perror("Pipe error");
+	while (1)
 	{
-		free(pipex->pipes[i]);
-		i++;
+		write(1, ">", 1);
+		line = get_next_line(STDIN_FILENO);
+		if (!line || ft_strncmp(line, delimiter, 1) == 0)
+		{
+			free(line);
+			break ;
+		}
+		write(temp_pipe[WRITE], line, ft_strlen(line));
+		free(line);
 	}
-	free(pipex->pipes);
-	free(pipex);
+	close(temp_pipe[WRITE]);
+	return (temp_pipe[READ]);
 }
 
 void	ft_init(t_pipex *pipex, int argc)
@@ -50,6 +58,29 @@ void	ft_init(t_pipex *pipex, int argc)
 			free(pipex), ft_perror("Malloc failed: pids"));
 }
 
+void	ft_free_pipex(t_pipex *pipex)
+{
+	int	i;
+
+	i = 0;
+	if (pipex->commands)
+		ft_freedouble(pipex->commands);
+	if (pipex->clean_paths)
+		ft_freedouble(pipex->clean_paths);
+	if (pipex->pids)
+		free(pipex->pids);
+	if (pipex->pipes)
+	{
+		while (i < pipex->n)
+		{
+			free(pipex->pipes[i]);
+			i++;
+		}
+		free(pipex->pipes);
+	}
+	free(pipex);
+}
+
 void	ft_perror(const char *str)
 {
 	while (str && *str)
@@ -58,10 +89,10 @@ void	ft_perror(const char *str)
 	exit(1);
 }
 
-void	ft_not_found(char *str, int *count)
+void	ft_not_found(char *str, t_pipex *pipex)
 {
 	write(2, "Command not found:  ", 19);
 	write(2, str, ft_strlen(str));
 	write(2, "\n", 1);
-	(*count) += 1;
+	(ft_free_pipex(pipex), ft_perror("Path failed: comands"));
 }
