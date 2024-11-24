@@ -36,14 +36,14 @@ BONUS_NAME = pipex_bonus
 
 
 # Reglas
-all: $(OBJ_DIR) $(NAME)
+all: $(NAME)
 
 bonus: $(BONUS_NAME)
 
-$(BONUS_NAME): $(LIBFT) $(BONUS_OBJS)
+$(BONUS_NAME): $(OBJ_DIR_BONUS) $(LIBFT) $(BONUS_OBJS)
 	$(CC) $(CFLAGS) $(BONUS_OBJS) $(LIBFT) -o $(BONUS_NAME)
 
-$(NAME): $(LIBFT)  $(OBJS)
+$(NAME): $(OBJ_DIR) $(LIBFT)  $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME)
 
 # Crea los directorios necesarios para archivos del proyecto principal
