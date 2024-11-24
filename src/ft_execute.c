@@ -6,11 +6,25 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:32:39 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/22 23:28:30 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/24 21:02:22 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../pipexft.h"
+
+void	ft_close_pipes(t_pipex *pipex)
+{
+	int i = 0;
+	if (pipex->pipes)
+	{
+		while (i < pipex->n - 1)
+		{
+			close(pipex->pipes[i][READ]);
+			close(pipex->pipes[i][WRITE]);
+			i++;
+		}
+	}
+}
 
 char	*ft_search_way(const char *key, char **env, size_t len)
 {
@@ -52,53 +66,48 @@ char	*ft_accessible_path(char **paths, char *command)
 	return (NULL);
 }
 
-char **ft_parse_command(char *argv)
-{
-    char    **parsed;
-    int     i;
-
-    parsed = malloc(sizeof(char *) * 2097152);
-    if (!parsed)
-        return (NULL);
-    i = 0;
-    while (*argv)
-    {
-        while (*argv && ft_isspace(*argv))
-            argv++;
-        if (*argv == '"') // Maneja comillas dobles
-            parsed[i++] = ft_extract_quoted(&argv, '"');
-        else if (*argv == '\'') // Maneja comillas simples
-            parsed[i++] = ft_extract_quoted(&argv, '\'');
-        else
-            parsed[i++] = ft_extract_word(&argv);
-    }
-    parsed[i] = NULL;
-    return (parsed);
-}
-
-
 void	ft_execute_cmd(t_pipex *pipex, char *argv, char **env, char *pathname)
 {
+	if (!argv || !argv[0] || argv[0] == ' ')
+		(ft_not_found(argv), exit(127));
 	if (argv[0] == '/')
 	{
 		pipex->commands = ft_split(argv, ' ');
 		pathname = pipex->commands[0];
+		if (access(pathname, X_OK) != 0)
+			(ft_free_pipex(pipex), ft_perror("No such file or directory"), exit(127));
+	}
+	else if (ft_strchr(argv, '/'))
+	{
+		pipex->commands = ft_split(argv, ' ');
+		pathname = pipex->commands[0];
+
+		if (access(pathname, X_OK) != 0)
+			(ft_free_pipex(pipex), ft_perror("No such file or directory"), exit(127));
 	}
 	else
 	{
 		pipex->commands = ft_split(argv, ' ');
 		if (!pipex->commands || !pipex->commands[0])
-			(ft_free_pipex(pipex), ft_perror("Invalid command"));
+			(ft_free_pipex(pipex), ft_perror("Invalid command"), exit(127));
 		pipex->found_way = ft_search_way("PATH=", env, 5);
 		if (!pipex->found_way)
-			(ft_free_pipex(pipex), ft_perror("PATH not found in environment"));
+			(ft_free_pipex(pipex), ft_perror("PATH not found in environment"), exit(127));
 		pipex->clean_paths = ft_clean_path(pipex->found_way);
 		pathname = ft_accessible_path(pipex->clean_paths, pipex->commands[0]);
-		ft_freedouble(pipex->clean_paths);
-		if (!pathname)
-			ft_not_found(pipex->commands[0], pipex);
+		//ft_freedouble(pipex->clean_paths);
+		if (!pathname) {
+			ft_not_found(argv);
+			// ft_free_pipex(pipex);
+			exit(127);
+		}
 	}
-	execve(pathname, pipex->commands, env);
-	ft_free_pipex(pipex);
-	ft_perror("Execution failed");
+	ft_close_pipes(pipex);
+	if (execve(pathname, pipex->commands, env) == -1)
+	{
+		if (errno == EACCES)
+        	(ft_free_pipex(pipex), ft_perror("Permission denied"), exit(126));
+    	else
+        	(ft_free_pipex(pipex), ft_not_found(pipex->commands[0]), exit(127));
+	}
 }

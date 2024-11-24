@@ -580,8 +580,6 @@ END_COMMENT
 echo -e "${BLU_BG}Zombies (children process not waited by pipex):${END}"
 rm -rf *top_result zombies_test*
 
-gcc -o popo popo.c
-
 echo -ne "Test 1 : ./pipex Makefile \"sleep 3\" \"sleep 1\" outf \t\t\t--> "
 start_Z_nb=$(top -bn1 | head -n2 | egrep -o "[0-9]* zombie$" | egrep -o "[0-9]*")
 ./pipex Makefile "sleep 3" "sleep 1" outf &

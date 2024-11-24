@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:43:13 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/22 22:38:25 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/24 20:24:37 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,11 @@ void	ft_init(t_pipex *pipex, int argc)
 	int	i;
 
 	pipex->n = argc - 3;
-	pipex->pipes = (int **)malloc((pipex->n) * sizeof(int *));
+	pipex->pipes = (int **)malloc((pipex->n - 1) * sizeof(int *));
 	if (!pipex->pipes)
 		(free(pipex), ft_perror("Malloc failed: pipes"));
 	i = 0;
-	while (i < pipex->n)
+	while (i < pipex->n - 1)
 	{
 		pipex->pipes[i] = (int *)malloc(2 * sizeof(int));
 		if (!pipex->pipes[i] || pipe(pipex->pipes[i]) == -1)
@@ -71,8 +71,10 @@ void	ft_free_pipex(t_pipex *pipex)
 		free(pipex->pids);
 	if (pipex->pipes)
 	{
-		while (i < pipex->n)
+		while (i < pipex->n - 1)
 		{
+			close(pipex->pipes[i][READ]);
+			close(pipex->pipes[i][WRITE]);
 			free(pipex->pipes[i]);
 			i++;
 		}
@@ -81,18 +83,24 @@ void	ft_free_pipex(t_pipex *pipex)
 	free(pipex);
 }
 
-void	ft_perror(const char *str)
+/*void	ft_perror(const char *str)
 {
 	while (str && *str)
 		write(2, str++, 1);
 	write(2, "\n", 1);
 	exit(1);
-}
+}*/
 
-void	ft_not_found(char *str, t_pipex *pipex)
+void	ft_perror(const char *str)
 {
-	write(2, "Command not found:  ", 19);
+	write(2, "pipex: ", 7);
 	write(2, str, ft_strlen(str));
 	write(2, "\n", 1);
-	(ft_free_pipex(pipex), ft_perror("Path failed: comands"));
+}
+
+void	ft_not_found(char *str)
+{
+	write(2, "pipex: Command not found ", 26);
+	write(2, str, ft_strlen(str));
+	write(2, "\n", 1);
 }

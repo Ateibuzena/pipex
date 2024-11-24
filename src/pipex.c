@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:55:10 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/22 23:33:01 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/24 20:44:13 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ static void	ft_redirection(int argc, char **argv, t_pipex *pipex, char **env)
 	infile = open(argv[1], O_RDONLY);
 	outfile = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (outfile < 0 || infile < 0)
-		ft_perror("Open failed: outfile");
+		(free(pipex), perror("Open failed: outfile"), exit(EXIT_FAILURE));
 	ft_child_process(infile, outfile);
 	ft_execute_cmd(pipex, argv[2], env, NULL);
 }
@@ -30,7 +30,8 @@ static void	ft_check_args(int argc, t_pipex *pipex)
 	if (argc < MIN_ARGS || argc > 5)
 	{
 		free(pipex);
-		ft_perror("./pipex file1 'command1' 'command2' file2");
+		write(2, "./pipex file1 'command1' 'command2' file2\n", 43);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -40,10 +41,11 @@ int	main(int argc, char **argv, char **env)
 
 	pipex = malloc(sizeof(t_pipex));
 	if (!pipex)
-		ft_perror("Malloc filed: pipex");
+		return (perror("Malloc filed: pipex"), 1);
+	ft_memset(pipex, 0, sizeof(pipex));
 	ft_check_args(argc, pipex);
 	pipex->i = 1;
-	if (argc > 4)
+	if (argc >= 5)
 	{
 		ft_init(pipex, argc);
 		ft_first_process(argv, pipex, env);
@@ -54,5 +56,8 @@ int	main(int argc, char **argv, char **env)
 		ft_redirection(argc, argv, pipex, env);
 	ft_waitpid(pipex);
 	ft_free_pipex(pipex);
-	return (0);
+	close(0);
+	close(1);
+	close(2);
+	return (pipex->status);
 }
