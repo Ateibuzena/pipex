@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:43:13 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/24 20:24:37 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/25 13:38:36 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,10 @@ int	ft_here_doc(char *delimiter)
 		ft_perror("Pipe error");
 	while (1)
 	{
+		//fprintf(stderr, "dentro de here_doc\n fd here_doc read: %d fd here_doc write: %d\n", temp_pipe[READ], temp_pipe[WRITE]);
 		write(1, ">", 1);
 		line = get_next_line(STDIN_FILENO);
-		if (!line || ft_strncmp(line, delimiter, 1) == 0)
+		if (!line || ft_strncmp(line, delimiter, ft_strlen(delimiter)) == 0)
 		{
 			free(line);
 			break ;
@@ -35,11 +36,16 @@ int	ft_here_doc(char *delimiter)
 	return (temp_pipe[READ]);
 }
 
-void	ft_init(t_pipex *pipex, int argc)
+void	ft_init(t_pipex *pipex, int argc, char *argv[])
 {
 	int	i;
 
-	pipex->n = argc - 3;
+	if (argv[1] && ft_strcmp(argv[1], "here_doc"))
+		pipex->n = argc - 4;
+	else
+		pipex->n = argc - 3;
+	pipex->count = 0;
+	//fprintf(stderr, "Forks hechos: %d Forks por hacer: %d\n", pipex->count, (pipex->n - pipex->count));
 	pipex->pipes = (int **)malloc((pipex->n - 1) * sizeof(int *));
 	if (!pipex->pipes)
 		(free(pipex), ft_perror("Malloc failed: pipes"));
@@ -93,14 +99,33 @@ void	ft_free_pipex(t_pipex *pipex)
 
 void	ft_perror(const char *str)
 {
-	write(2, "pipex: ", 7);
 	write(2, str, ft_strlen(str));
 	write(2, "\n", 1);
 }
 
-void	ft_not_found(char *str)
+void	ft_errno(char **arguments, char *argument)
 {
-	write(2, "pipex: Command not found ", 26);
-	write(2, str, ft_strlen(str));
-	write(2, "\n", 1);
+	(void)arguments;
+	if (errno == ENOENT)
+        ft_perror(ft_strjoin("pipex: ", ft_strjoin(argument, ": No such file or directory")));
+    else if (errno == EACCES)
+        ft_perror(ft_strjoin("pipex: ", ft_strjoin(argument, ": Permission denied")));
+    else if (errno == ENOMEM)
+        ft_perror("pipex: Out of memory");
+    else if (errno == EINVAL)
+        ft_perror("pipex: Invalid argument");
+    else if (errno == EISDIR)
+        ft_perror("pipex: Is a directory");
+    else if (errno == EMFILE)
+        ft_perror("pipex: Too many open files");
+    else if (errno == ENFILE)
+        ft_perror("pipex: Too many open files in system");
+    else if (errno == EFAULT)
+        ft_perror("pipex: Bad address");
+    else if (errno == EROFS)
+        ft_perror("pipex: Read-only file system");
+    else if (errno == ETXTBSY)
+        ft_perror("pipex: Text file busy");
+    else
+        ft_perror("pipex: Open failed");
 }

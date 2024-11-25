@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:32:39 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/24 21:02:22 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/25 13:23:42 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,35 +69,28 @@ char	*ft_accessible_path(char **paths, char *command)
 void	ft_execute_cmd(t_pipex *pipex, char *argv, char **env, char *pathname)
 {
 	if (!argv || !argv[0] || argv[0] == ' ')
-		(ft_not_found(argv), exit(127));
-	if (argv[0] == '/')
+		(ft_perror(ft_strjoin(argv, ": command not found")), exit(127));
+	if (ft_strchr(argv, '/'))
 	{
 		pipex->commands = ft_split(argv, ' ');
 		pathname = pipex->commands[0];
 		if (access(pathname, X_OK) != 0)
-			(ft_free_pipex(pipex), ft_perror("No such file or directory"), exit(127));
-	}
-	else if (ft_strchr(argv, '/'))
-	{
-		pipex->commands = ft_split(argv, ' ');
-		pathname = pipex->commands[0];
-
-		if (access(pathname, X_OK) != 0)
-			(ft_free_pipex(pipex), ft_perror("No such file or directory"), exit(127));
+			(ft_free_pipex(pipex), ft_perror(ft_strjoin("pipex: ", ft_strjoin(argv, ": No such file or directory"))), exit(127));
 	}
 	else
 	{
 		pipex->commands = ft_split(argv, ' ');
 		if (!pipex->commands || !pipex->commands[0])
-			(ft_free_pipex(pipex), ft_perror("Invalid command"), exit(127));
+			(ft_free_pipex(pipex), ft_perror(ft_strjoin(argv, ": command not found")), exit(127));
 		pipex->found_way = ft_search_way("PATH=", env, 5);
 		if (!pipex->found_way)
-			(ft_free_pipex(pipex), ft_perror("PATH not found in environment"), exit(127));
+			(ft_free_pipex(pipex), ft_perror(ft_strjoin("pipex: ", ft_strjoin(argv, ": No such file or directory"))), exit(127));
 		pipex->clean_paths = ft_clean_path(pipex->found_way);
 		pathname = ft_accessible_path(pipex->clean_paths, pipex->commands[0]);
 		//ft_freedouble(pipex->clean_paths);
-		if (!pathname) {
-			ft_not_found(argv);
+		if (!pathname)
+		{
+			ft_perror(ft_strjoin(argv, ": command not found"));
 			// ft_free_pipex(pipex);
 			exit(127);
 		}
@@ -106,8 +99,8 @@ void	ft_execute_cmd(t_pipex *pipex, char *argv, char **env, char *pathname)
 	if (execve(pathname, pipex->commands, env) == -1)
 	{
 		if (errno == EACCES)
-        	(ft_free_pipex(pipex), ft_perror("Permission denied"), exit(126));
+        	(ft_free_pipex(pipex), ft_perror(ft_strjoin("pipex: ", ft_strjoin(argv, ": Permission denied"))), exit(126));
     	else
-        	(ft_free_pipex(pipex), ft_not_found(pipex->commands[0]), exit(127));
+        	(ft_free_pipex(pipex), ft_perror(ft_strjoin(pipex->commands[0], ": command not found")), exit(127));
 	}
 }

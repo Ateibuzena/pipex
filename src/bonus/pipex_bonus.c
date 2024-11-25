@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:56:26 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/24 21:29:37 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/25 12:14:36 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,16 +44,15 @@ int	main(int argc, char **argv, char **env)
 	if (!pipex)
 		return (perror("Malloc filed: pipex"), 1);
 	ft_memset(pipex, 0, sizeof(pipex));
-	//pipex->i = 0;
 	ft_check_args(argc, argv, pipex);
-	ft_init(pipex, argc);
+	ft_init(pipex, argc, argv);
 	ft_first_process(argv, pipex, env);
 	pipex->i = ft_middle_process(argv, pipex, env);
 	ft_last_process(argc, argv, pipex, env);
 	ft_waitpid(pipex);
 	ft_free_pipex(pipex);
-	close(0);
-	close(1);
-	close(2);
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
 	return (pipex->status);
 }

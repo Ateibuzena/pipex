@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/22 22:13:34 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/24 21:02:10 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/25 13:36:49 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ typedef struct s_pipex
 {
 	int		n;
 	int		i;
+	int		count;
 	int		**pipes;
 	pid_t	*pids;
 	char	*found_way;
@@ -60,9 +61,9 @@ void	ft_execute_cmd(t_pipex *pipex, char *argv, char **env, char *pathname);
 
 /*ft_utils.c*/
 int		ft_here_doc(char *delimiter);
-void	ft_init(t_pipex *pipex, int argc);
+void	ft_init(t_pipex *pipex, int argc, char *argv[]);
 void	ft_free_pipex(t_pipex *pipex);
 void	ft_perror(const char *str);
-void	ft_not_found(char *str);
+void	ft_errno(char **arguments, char *argument);
 
 #endif

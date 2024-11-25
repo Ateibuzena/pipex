@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:37:22 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/24 20:48:30 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/25 13:37:02 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ void	ft_first_process(char **argv, t_pipex *pipex, char **env)
 	int	infile;
 
 	pipex->pids[0] = fork();
+	pipex->count += 1;
+	//fprintf(stderr, "Forks hechos: %d Forks por hacer: %d\n", pipex->count, (pipex->n - pipex->count));
 	if (pipex->pids[0] < 0)
 		(ft_free_pipex(pipex), ft_perror("Fork error: first_process\n"), exit(1)); //exit, cerrar fds anteriores y pipes, cambiar a ft_perror, 
 	if (pipex->pids[0] == 0)
@@ -43,12 +45,7 @@ void	ft_first_process(char **argv, t_pipex *pipex, char **env)
 			infile = open(argv[1], O_RDONLY);
 		if (infile < 0)
 		{
-			if (errno == ENOENT)
-				(ft_perror("No such file or directory")); //quitar exits
-			else if (errno == EACCES)
-				(ft_perror("Permission denied"));
-			else
-				(ft_perror("Open failed"));
+			ft_errno(argv, argv[1]);
 			ft_free_pipex(pipex);
 			exit(1);
 		}
@@ -71,6 +68,8 @@ int	ft_middle_process(char **argv, t_pipex *pipex, char **env)
 	while (i < (pipex->n - 1))
 	{
 		pipex->pids[i] = fork();
+		pipex->count += 1;
+		//fprintf(stderr, "Forks hechos: %d Forks por hacer: %d\n", pipex->count, (pipex->n - pipex->count));
 		if (pipex->pids[i] < 0)
 			(ft_free_pipex(pipex), ft_perror("Fork error: middle_process"), exit(1));
 		if (pipex->pids[i] == 0)
@@ -91,6 +90,8 @@ void	ft_last_process(int argc, char **argv, t_pipex *pipex, char **env)
 	int	outfile;
 
 	pipex->pids[pipex->i] = fork();
+	pipex->count += 1;
+	//fprintf(stderr, "Forks hechos: %d Forks por hacer: %d\n", pipex->count, (pipex->n - pipex->count));
 	if (pipex->pids[pipex->i] < 0)
 		(ft_free_pipex(pipex), ft_perror("Fork error: first_process"), exit(1)); //cerrar fds anteriores
 	if (pipex->pids[pipex->i] == 0)
@@ -101,10 +102,7 @@ void	ft_last_process(int argc, char **argv, t_pipex *pipex, char **env)
 			outfile = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (outfile < 0)
 		{
-			if (errno == EACCES)
-				(ft_perror("Permission denied"));
-			else
-				(ft_perror("Open failed"));
+			ft_errno(argv, argv[argc - 1]);
 			ft_free_pipex(pipex);
 			exit(1);
 		}
@@ -124,8 +122,28 @@ void	ft_waitpid(t_pipex *pipex)
 	{
 		if (waitpid(-1, &status, 0) == pipex->pids[pipex->n - 1])
 			pipex->status = WEXITSTATUS(status);
-		/*if (WIFSIGNALED(pipex->status))
-			pipex->status = 128 + WTERMSIG(pipex->status);*/
 		i++;
 	}
 }
+
+/*void    ft_waitpid(t_pipex *pipex)
+{
+    int     i;
+    int     status;
+
+    i = 0;
+    while (i < pipex->n)
+	{
+        // Espera a cada proceso hijo individualmente
+        if (waitpid(pipex->pids[i], &status, 0) == pipex->pids[i])
+		{
+            // Si el proceso terminó correctamente, guarda el estado de salida
+            if (WIFEXITED(status))
+                pipex->status = WEXITSTATUS(status);
+            // Si el proceso terminó por una señal, guarda el código de la señal
+            else if (WIFSIGNALED(status))
+                pipex->status = 128 + WTERMSIG(status);
+        }
+        i++;
+    }
+}*/
