@@ -43,14 +43,14 @@ all: $(NAME)
 bonus: $(BONUS_NAME)
 
 $(BONUS_NAME): $(OBJ_DIR_BONUS) $(LIBFT) $(BONUS_OBJS)
-	@printf "$(CYAN)[Building Bonus]$(RESET) Creating $(BONUS_NAME)...\n"
+	@printf "$(CYAN)[Building Bonus] Creating $(BONUS_NAME)...\n$(RESET)"
 	@$(CC) $(CFLAGS) $(BONUS_OBJS) $(LIBFT) -o $(BONUS_NAME)
-	@printf "$(GREEN)[Success]$(RESET) $(BONUS_NAME) created successfully!\n"
+	@printf "$(GREEN)[Success] $(BONUS_NAME) created successfully!\n$(RESET)"
 
 $(NAME): $(OBJ_DIR) $(LIBFT) $(OBJS)
-	@printf "$(CYAN)[Building Main]$(RESET) Creating $(NAME)...\n"
+	@printf "$(CYAN)[Building Main] Creating $(NAME)...\n$(RESET)"
 	@$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME)
-	@printf "$(GREEN)[Success]$(RESET) $(NAME) created successfully!\n"
+	@printf "$(GREEN)[Success] $(NAME) created successfully!\n$(RESET)"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	@mkdir -p $(dir $@)
@@ -63,30 +63,30 @@ $(OBJ_DIR_BONUS)/%.o: $(BONUS_DIR)/%.c | $(OBJ_DIR_BONUS)
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(OBJ_DIR):
-	@printf "$(CYAN)[Directory]$(RESET) Creating object directory $(OBJ_DIR)...\n"
+	@printf "$(CYAN)[Directory] Creating object directory $(OBJ_DIR)...\n$(RESET)"
 	@mkdir -p $(OBJ_DIR)
 
 $(OBJ_DIR_BONUS):
-	@printf "$(CYAN)[Directory]$(RESET) Creating bonus object directory $(OBJ_DIR_BONUS)...\n"
+	@printf "$(CYAN)[Directory] Creating bonus object directory $(OBJ_DIR_BONUS)...\n$(RESET)"
 	@mkdir -p $(OBJ_DIR_BONUS)
 
 $(LIBFT):
-	@printf "$(CYAN)[Building Libft]$(RESET) Compiling libft...\n"
+	@printf "$(CYAN)[Building Libft] Compiling libft...\n$(RESET)"
 	@$(MAKE) -C $(LIBFT_DIR)
 	@$(MAKE) -C $(LIBFT_DIR) bonus
 	@$(MAKE) -C $(LIBFT_DIR) clean
-	@printf "$(GREEN)[Libft Ready]$(RESET) Libft compiled successfully!\n"
+	@printf "$(GREEN)[Libft Ready] Libft compiled successfully!\n$(RESET)"
 
 clean:
-	@printf "$(RED)[Cleaning]$(RESET) Removing object files...\n"
+	@printf "$(RED)[Cleaning] Removing object files...\n$(RESET)"
 	@rm -rf $(OBJ_DIR) $(OBJ_DIR_BONUS)
-	@printf "$(GREEN)[Cleaned]$(RESET) Object files removed successfully!\n"
+	@printf "$(GREEN)[Cleaned] Object files removed successfully!\n$(RESET)"
 
 fclean: clean
-	@printf "$(RED)[Full Clean]$(RESET) Removing binaries and $(LIBFT)...\n"
+	@printf "$(RED)[Full Clean] Removing binaries and $(LIBFT)...\n$(RESET)"
 	@$(MAKE) -C $(LIBFT_DIR) fclean
 	@rm -f $(NAME) $(BONUS_NAME)
-	@printf "$(GREEN)[Cleaned]$(RESET) All binaries and libraries removed successfully!\n"
+	@printf "$(GREEN)[Cleaned] All binaries and libraries removed successfully!\n$(RESET)"
 
 re: fclean all
 

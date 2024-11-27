@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/22 22:13:34 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/25 13:36:49 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/27 00:42:46 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,17 +53,17 @@ void	ft_last_process(int argc, char **argv, t_pipex *pipex, char **env);
 void	ft_waitpid(t_pipex *pipex);
 
 /*ft_execute.c*/
-void	ft_close_pipes(t_pipex *pipex);
-char	*ft_search_way(const char *key, char **env, size_t len);
-char	**ft_clean_path(char *path_value);
-char	*ft_accessible_path(char **paths, char *command);
+int		ft_here_doc(char *delimiter);
+char	*ft_find_env_value(const char *key, char **env, size_t len);
+char	*ft_find_executable(char **paths, char *command);
+void	ft_resolve_cmd(t_pipex *pipex, char *argv, char **env, char **pathname);
 void	ft_execute_cmd(t_pipex *pipex, char *argv, char **env, char *pathname);
 
 /*ft_utils.c*/
-int		ft_here_doc(char *delimiter);
 void	ft_init(t_pipex *pipex, int argc, char *argv[]);
-void	ft_free_pipex(t_pipex *pipex);
+void	ft_close_pipes(t_pipex *pipex);
 void	ft_perror(const char *str);
-void	ft_errno(char **arguments, char *argument);
+void	ft_errno(char *argument);
+void	ft_free_pipex(t_pipex *pipex);
 
 #endif
