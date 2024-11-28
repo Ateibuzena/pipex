@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:37:22 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/27 01:57:05 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/28 12:47:08 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,92 +31,74 @@ void	ft_child_process(int input_fd, int output_fd)
 void	ft_first_process(char **argv, t_pipex *pipex, char **env)
 {
 	int	infile;
-	t_pipex *child_pipex;
-	
-	child_pipex = malloc(1 * sizeof(t_pipex));
-	if (!child_pipex)
-		exit(EXIT_FAILURE);
-	ft_memcpy(child_pipex, pipex, sizeof(t_pipex));
-	child_pipex->pids[0] = fork();
-	child_pipex->count += 1;
-	if (child_pipex->pids[0] < 0)
-		(ft_free_pipex(child_pipex), exit(1));
-	if (child_pipex->pids[0] == 0)
+
+	pipex->pids[0] = fork();
+	pipex->count += 1;
+	if (pipex->pids[0] < 0)
+		(ft_free_pipex(&pipex), exit(1));
+	if (pipex->pids[0] == 0)
 	{
 		if (argv[1] && ft_strcmp(argv[1], "here_doc"))
 			infile = ft_here_doc(argv[2]);
 		else if (argv[1] && !ft_strcmp(argv[1], "here_doc"))
 			infile = open(argv[1], O_RDONLY);
 		if (infile < 0)
-			(ft_errno(argv[1]), free(child_pipex), exit(1));	//ft_free_pipex(child_pipex);
-		close(child_pipex->pipes[0][READ]);
-		ft_child_process(infile, child_pipex->pipes[0][WRITE]);
-		ft_execute_cmd(child_pipex, argv[1 + child_pipex->i], env, NULL);
+			(ft_errno(argv[1]), ft_free_pipex(&pipex), exit(1));
+		close(pipex->pipes[0][READ]);
+		ft_child_process(infile, pipex->pipes[0][WRITE]);
+		ft_execute_cmd(pipex, argv[1 + pipex->i], env, NULL);
 	}
-	close(child_pipex->pipes[0][WRITE]);
-	free(child_pipex); //1
+	close(pipex->pipes[0][WRITE]);
 }
 
 int	ft_middle_process(char **argv, t_pipex *pipex, char **env)
 {
 	int	i;
 	int	j;
-	t_pipex *child_pipex;
-	
-	child_pipex = malloc(1 * sizeof(t_pipex));
-	if (!child_pipex)
-		exit(EXIT_FAILURE);
-	ft_memcpy(child_pipex, pipex, sizeof(t_pipex));
+
 	j = 0;
 	if (ft_strcmp(argv[1], "here_doc") != 0)
 		j = 1;
 	i = 1;
-	while (i < (child_pipex->n - 1))
+	while (i < (pipex->n - 1))
 	{
-		child_pipex->pids[i] = fork();
-		child_pipex->count += 1;
-		if (child_pipex->pids[i] < 0)
-			(ft_free_pipex(child_pipex), exit(1));
-		if (child_pipex->pids[i] == 0)
+		pipex->pids[i] = fork();
+		pipex->count += 1;
+		if (pipex->pids[i] < 0)
+			(ft_free_pipex(&pipex), exit(1));
+		if (pipex->pids[i] == 0)
 		{
-			close(child_pipex->pipes[i][READ]);
-			ft_child_process(child_pipex->pipes[i - 1][READ], child_pipex->pipes[i][WRITE]);
-			ft_execute_cmd(child_pipex, argv[i + j + 2], env, NULL);
+			close(pipex->pipes[i][READ]);
+			ft_child_process(pipex->pipes[i - 1][READ], pipex->pipes[i][WRITE]);
+			ft_execute_cmd(pipex, argv[i + j + 2], env, NULL);
 		}
-		close(child_pipex->pipes[i - 1][READ]);
-		close(child_pipex->pipes[i][WRITE]);
+		close(pipex->pipes[i - 1][READ]);
+		close(pipex->pipes[i][WRITE]);
 		i++;
 	}
-	free(child_pipex); //1
 	return (i);
 }
 
 void	ft_last_process(int argc, char **argv, t_pipex *pipex, char **env)
 {
 	int	outfile;
-	t_pipex *child_pipex;
-	
-	child_pipex = malloc(1 * sizeof(t_pipex));
-	if (!child_pipex)
-		exit(EXIT_FAILURE);
-	ft_memcpy(child_pipex, pipex, sizeof(t_pipex));
-	child_pipex->pids[child_pipex->i] = fork();
-	child_pipex->count += 1;
-	if (child_pipex->pids[child_pipex->i] < 0)
-		(ft_free_pipex(child_pipex), exit(1));
-	if (child_pipex->pids[child_pipex->i] == 0)
+
+	pipex->pids[pipex->i] = fork();
+	pipex->count += 1;
+	if (pipex->pids[pipex->i] < 0)
+		(ft_free_pipex(&pipex), exit(1));
+	if (pipex->pids[pipex->i] == 0)
 	{
 		if (ft_strcmp(argv[1], "here_doc") != 0)
 			outfile = open(argv[argc - 1], O_WRONLY | O_CREAT | O_APPEND, 0644);
 		else
 			outfile = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (outfile < 0)
-			(ft_errno(argv[argc - 1]), ft_free_pipex(child_pipex), exit(1));
-		ft_child_process(child_pipex->pipes[child_pipex->i - 1][READ], outfile);
-		ft_execute_cmd(child_pipex, argv[argc - 2], env, NULL);
+			(ft_errno(argv[argc - 1]), ft_free_pipex(&pipex), exit(1));
+		ft_child_process(pipex->pipes[pipex->i - 1][READ], outfile);
+		ft_execute_cmd(pipex, argv[argc - 2], env, NULL);
 	}
-	close(child_pipex->pipes[child_pipex->i - 1][READ]);
-	free(child_pipex); //1
+	close(pipex->pipes[pipex->i - 1][READ]);
 }
 
 void	ft_waitpid(t_pipex *pipex)

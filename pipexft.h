@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/22 22:13:34 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/27 00:42:46 by azubieta         ###   ########.fr       */
+/*   Updated: 2024/11/28 12:39:35 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,6 @@ void	ft_init(t_pipex *pipex, int argc, char *argv[]);
 void	ft_close_pipes(t_pipex *pipex);
 void	ft_perror(const char *str);
 void	ft_errno(char *argument);
-void	ft_free_pipex(t_pipex *pipex);
+void	ft_free_pipex(t_pipex **pipex);
 
 #endif
