@@ -9,19 +9,20 @@ The project is organized in a modular and clear way to facilitate both compilati
 │ ├── Makefile
 │ ├── README.md
 │ └── src/
-│ ├── d_ascii/
-│ ├── d_fds/
-│ ├── d_get_next_line/
-│ ├── d_lists/
-│ ├── d_memory/
-│ ├── d_printf/
-│ └── d_strings/
+│ | ├── d_ascii/
+│ | ├── d_fds/
+│ | ├── d_get_next_line/
+│ | ├── d_lists/
+│ | ├── d_memory/
+│ | ├── d_printf/
+│ | └── d_strings/
+| | ...
 ├── Makefile
 ├── pipexft.h
 ├── README.md
 └── src/
-├── bonus/
-│ └── pipex_bonus.c
+| ├── bonus/
+│ | └── pipex_bonus.c
 ├── ft_execute.c
 ├── ft_process.c
 ├── ft_utils.c
@@ -30,7 +31,7 @@ The project is organized in a modular and clear way to facilitate both compilati
 
 * **libft/**: Custom library with reusable functions organized by category.  
 * **src/**: Main Pipex source code, split into files by functionality (execution, processes, utilities).  
-* **bonus/**: Extra features and improvements implemented for the extended version.  
+* **src/bonus/**: Extra features and improvements implemented for the extended version.  
 * **Makefile and root files**: Manage compilation and define structures and prototypes used throughout the project.
 
 ---
