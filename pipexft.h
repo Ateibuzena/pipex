@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   pipexft.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
+/*   By: azubieta <azubieta@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/22 22:13:34 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/28 12:39:35 by azubieta         ###   ########.fr       */
+/*   Updated: 2025/06/22 17:00:43 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PIPEXFT_H
 # define PIPEXFT_H
 
-# include "../../Utils/libft/libft.h"
+# include "libft.h"
 # include <errno.h>
 # include <sys/wait.h>
 # include <aio.h>
