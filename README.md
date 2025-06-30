@@ -16,7 +16,7 @@ The project is organized in a modular and clear way to facilitate both compilati
 │ │ ├── d_memory/
 │ │ ├── d_printf/
 │ │ └── d_strings/
-| │ ...
+│ │ ...
 ├── Makefile
 ├── pipexft.h
 ├── README.md
