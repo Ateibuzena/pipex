@@ -3,7 +3,7 @@
 ## 📁 Project Structure
 
 The project is organized in a modular and clear way to facilitate both compilation and code understanding:
-
+```bash
 ├── libft/
 │ ├── libft.h
 │ ├── Makefile
@@ -26,6 +26,7 @@ The project is organized in a modular and clear way to facilitate both compilati
 ├── ft_process.c
 ├── ft_utils.c
 └── pipex.c
+```
 
 * **libft/**: Custom library with reusable functions organized by category.  
 * **src/**: Main Pipex source code, split into files by functionality (execution, processes, utilities).  
