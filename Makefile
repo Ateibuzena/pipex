@@ -1,93 +1,83 @@
-# Variables
-CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g
+# ==== Variables ====
+CC      = gcc
+CFLAGS  = -Wall -Wextra -Werror -g
 
-LIBFT_DIR = /home/azubieta/sgoinfre/azubieta/Utils/libft
-LIBFT = $(LIBFT_DIR)/libft.a
+SRC_DIR     = src
+BONUS_DIR   = src/bonus
+OBJ_DIR     = objs
+OBJ_BONUS   = objs_bonus
 
-INCLUDES = -I$(LIBFT_DIR)
+LIBFT_DIR   = ./libft
+LIBFT       = $(LIBFT_DIR)/libft.a
+INCLUDES    = -I$(LIBFT_DIR)
 
-SRC_DIR = ./src
-SRCS = $(SRC_DIR)/pipex.c\
-		$(SRC_DIR)/ft_execute.c\
-		$(SRC_DIR)/ft_process.c\
-		$(SRC_DIR)/ft_utils.c\
+NAME        = pipex
+BONUS_NAME  = pipex_bonus
 
-OBJ_DIR = ./objs
-OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+# ==== Archivos comunes y específicos ====
+COMMON_SRCS = ft_execute.c ft_process.c ft_utils.c
+COMMON_SRCS := $(addprefix $(SRC_DIR)/, $(COMMON_SRCS))
 
-NAME = pipex
+NORMAL_SRCS = $(SRC_DIR)/pipex.c
+BONUS_SRCS  = $(BONUS_DIR)/pipex_bonus.c
 
-OBJ_DIR_BONUS = ./objs_bonus
-BONUS_DIR = ./src
-BONUS_SRCS = $(BONUS_DIR)/bonus/pipex_bonus.c\
-			$(BONUS_DIR)/ft_execute.c\
-			$(BONUS_DIR)/ft_process.c\
-			$(BONUS_DIR)/ft_utils.c\
+SRCS        = $(NORMAL_SRCS) $(COMMON_SRCS)
+BONUS_ALL   = $(BONUS_SRCS) $(COMMON_SRCS)
 
-BONUS_OBJS = $(BONUS_SRCS:$(BONUS_DIR)/%.c=$(OBJ_DIR_BONUS)/%.o)
+OBJS        = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+BONUS_OBJS  = $(BONUS_ALL:$(SRC_DIR)/%.c=$(OBJ_BONUS)/%.o)
+BONUS_OBJS  := $(BONUS_OBJS:$(BONUS_DIR)/%.c=$(OBJ_BONUS)/%.o)
 
-BONUS_NAME = pipex_bonus
+# ==== Colores ====
+RED     = \033[0;31m
+GREEN   = \033[0;32m
+YELLOW  = \033[0;33m
+CYAN    = \033[0;36m
+RESET   = \033[0m
 
-# Colors
-RED     			= \033[0;31m
-GREEN   			= \033[0;32m
-YELLOW  			= \033[0;33m
-CYAN    			= \033[0;36m
-WHITE   			= \033[0;37m
-RESET   			= \033[0m
-
-# Reglas
+# ==== Targets ====
 all: $(NAME)
+
+$(NAME): $(LIBFT) $(OBJS)
+	@printf "$(CYAN)[Linking] $@...\n$(RESET)"
+	@$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $@
+	@printf "$(GREEN)[Success] $@ built!\n$(RESET)"
 
 bonus: $(BONUS_NAME)
 
-$(BONUS_NAME): $(OBJ_DIR_BONUS) $(LIBFT) $(BONUS_OBJS)
-	@printf "$(CYAN)[Building Bonus] Creating $(BONUS_NAME)...\n$(RESET)"
-	@$(CC) $(CFLAGS) $(BONUS_OBJS) $(LIBFT) -o $(BONUS_NAME)
-	@printf "$(GREEN)[Success] $(BONUS_NAME) created successfully!\n$(RESET)"
+$(BONUS_NAME): $(LIBFT) $(BONUS_OBJS)
+	@printf "$(CYAN)[Linking Bonus] $@...\n$(RESET)"
+	@$(CC) $(CFLAGS) $(BONUS_OBJS) $(LIBFT) -o $@
+	@printf "$(GREEN)[Success] $@ built!\n$(RESET)"
 
-$(NAME): $(OBJ_DIR) $(LIBFT) $(OBJS)
-	@printf "$(CYAN)[Building Main] Creating $(NAME)...\n$(RESET)"
-	@$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME)
-	@printf "$(GREEN)[Success] $(NAME) created successfully!\n$(RESET)"
-
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
-	@printf "$(YELLOW)[Compiling]$(RESET) $<\n"
+	@printf "$(YELLOW)[Compiling] $<\n$(RESET)"
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-$(OBJ_DIR_BONUS)/%.o: $(BONUS_DIR)/%.c | $(OBJ_DIR_BONUS)
+$(OBJ_BONUS)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
-	@printf "$(YELLOW)[Compiling Bonus]$(RESET) $<\n"
+	@printf "$(YELLOW)[Compiling Bonus Common] $<\n$(RESET)"
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-$(OBJ_DIR):
-	@printf "$(CYAN)[Directory] Creating object directory $(OBJ_DIR)...\n$(RESET)"
-	@mkdir -p $(OBJ_DIR)
-
-$(OBJ_DIR_BONUS):
-	@printf "$(CYAN)[Directory] Creating bonus object directory $(OBJ_DIR_BONUS)...\n$(RESET)"
-	@mkdir -p $(OBJ_DIR_BONUS)
+$(OBJ_BONUS)/%.o: $(BONUS_DIR)/%.c
+	@mkdir -p $(dir $@)
+	@printf "$(YELLOW)[Compiling Bonus Specific] $<\n$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(LIBFT):
-	@printf "$(CYAN)[Building Libft] Compiling libft...\n$(RESET)"
+	@printf "$(CYAN)[Libft] Compiling...\n$(RESET)"
 	@$(MAKE) -C $(LIBFT_DIR)
-	@$(MAKE) -C $(LIBFT_DIR) bonus
-	@$(MAKE) -C $(LIBFT_DIR) clean
-	@printf "$(GREEN)[Libft Ready] Libft compiled successfully!\n$(RESET)"
 
 clean:
-	@printf "$(RED)[Cleaning] Removing object files...\n$(RESET)"
-	@rm -rf $(OBJ_DIR) $(OBJ_DIR_BONUS)
-	@printf "$(GREEN)[Cleaned] Object files removed successfully!\n$(RESET)"
+	@printf "$(RED)[Cleaning] Object files...\n$(RESET)"
+	@rm -rf $(OBJ_DIR) $(OBJ_BONUS)
 
 fclean: clean
-	@printf "$(RED)[Full Clean] Removing binaries and $(LIBFT)...\n$(RESET)"
-	@$(MAKE) -C $(LIBFT_DIR) fclean
+	@printf "$(RED)[Cleaning] Binaries and libft...\n$(RESET)"
 	@rm -f $(NAME) $(BONUS_NAME)
-	@printf "$(GREEN)[Cleaned] All binaries and libraries removed successfully!\n$(RESET)"
+	@$(MAKE) -C $(LIBFT_DIR) fclean
 
 re: fclean all
 
-.PHONY: all clean fclean re bonus
+.PHONY: all bonus clean fclean re
