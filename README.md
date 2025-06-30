@@ -4,7 +4,7 @@
 
 The project is organized in a modular and clear way to facilitate both compilation and code understanding:
 
-´´´bash
+´´´
 ├── libft/
 │ ├── libft.h
 │ ├── Makefile
