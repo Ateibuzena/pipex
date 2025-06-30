@@ -6,7 +6,7 @@
 /*   By: azubieta <azubieta@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:43:13 by azubieta          #+#    #+#             */
-/*   Updated: 2025/06/30 21:02:01 by azubieta         ###   ########.fr       */
+/*   Updated: 2025/06/30 22:19:48 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,28 +66,28 @@ void	ft_errno(char *argument)
 {
 	if (errno == ENOENT)
 		(ft_perror("pipex: "), ft_perror(argument),
-			ft_perror(": No such file or directory"));
+			ft_perror(": No such file or directory\n"));
 	else if (errno == EACCES)
 		(ft_perror("pipex: "), ft_perror(argument),
-			ft_perror(": Permission denied"));
+			ft_perror(": Permission denied\n"));
 	else if (errno == ENOMEM)
-		ft_perror("pipex: Out of memory");
+		ft_perror("pipex: Out of memory\n");
 	else if (errno == EINVAL)
-		ft_perror("pipex: Invalid argument");
+		ft_perror("pipex: Invalid argument\n");
 	else if (errno == EISDIR)
-		ft_perror("pipex: Is a directory");
+		ft_perror("pipex: Is a directory\n");
 	else if (errno == EMFILE)
-		ft_perror("pipex: Too many open files");
+		ft_perror("pipex: Too many open files\n");
 	else if (errno == ENFILE)
-		ft_perror("pipex: Too many open files in system");
+		ft_perror("pipex: Too many open files in system\n");
 	else if (errno == EFAULT)
-		ft_perror("pipex: Bad address");
+		ft_perror("pipex: Bad address\n");
 	else if (errno == EROFS)
-		ft_perror("pipex: Read-only file system");
+		ft_perror("pipex: Read-only file system\n");
 	else if (errno == ETXTBSY)
-		ft_perror("pipex: Text file busy");
+		ft_perror("pipex: Text file busy\n");
 	else
-		ft_perror("pipex: Open failed");
+		ft_perror("pipex: Open failed\n");
 }
 
 void	ft_free_pipex(t_pipex **pipex)
