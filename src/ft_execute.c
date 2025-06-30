@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_execute.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
+/*   By: azubieta <azubieta@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:32:39 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/28 12:24:16 by azubieta         ###   ########.fr       */
+/*   Updated: 2025/06/30 21:02:12 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ void	ft_resolve_cmd(t_pipex *pipex, char *argv, char **env, char **pathname)
 		if (access((*pathname), X_OK) != 0)
 			(ft_perror("pipex: "), ft_perror(argv),
 				ft_perror(": No such file or directory\n"),
-				ft_free_pipex(&pipex), ft_freedouble(pathname), exit(127));
+				ft_free_pipex(&pipex), exit(127));
 	}
 	else
 	{
@@ -95,8 +95,8 @@ void	ft_resolve_cmd(t_pipex *pipex, char *argv, char **env, char **pathname)
 		pipex->clean_paths = ft_split(pipex->found_way, ':');
 		*pathname = ft_find_executable(pipex->clean_paths, pipex->commands[0]);
 		if (!(*pathname))
-			(ft_perror(argv), ft_perror(": command not found"),
-				ft_free_pipex(&pipex), ft_freedouble(pathname), exit(127));
+			(ft_perror(argv), ft_perror(": command not found\n"),
+				ft_free_pipex(&pipex), exit(127));
 	}
 }
 
@@ -112,9 +112,9 @@ void	ft_execute_cmd(t_pipex *pipex, char *argv, char **env, char *pathname)
 		if (errno == EACCES)
 			(ft_perror("pipex: "),
 				ft_perror(argv), ft_perror(": Permission denied\n"),
-				ft_free_pipex(&pipex), free(pathname), exit(126));
+				ft_free_pipex(&pipex), exit(126));
 		else
 			(ft_perror(pipex->commands[0]), ft_perror(": command not found\n"),
-				ft_free_pipex(&pipex), free(pathname), exit(127));
+				ft_free_pipex(&pipex), exit(127));
 	}
 }

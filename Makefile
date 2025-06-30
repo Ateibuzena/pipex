@@ -12,7 +12,7 @@ LIBFT       = $(LIBFT_DIR)/libft.a
 INCLUDES    = -I$(LIBFT_DIR)
 
 NAME        = pipex
-BONUS_NAME  = pipex_bonus
+BONUS_NAME  = bonus/pipex
 
 # ==== Archivos comunes y específicos ====
 COMMON_SRCS = ft_execute.c ft_process.c ft_utils.c
@@ -46,9 +46,13 @@ $(NAME): $(LIBFT) $(OBJS)
 bonus: $(BONUS_NAME)
 
 $(BONUS_NAME): $(LIBFT) $(BONUS_OBJS)
+	@mkdir -p bonus
 	@printf "$(CYAN)[Linking Bonus] $@...\n$(RESET)"
 	@$(CC) $(CFLAGS) $(BONUS_OBJS) $(LIBFT) -o $@
 	@printf "$(GREEN)[Success] $@ built!\n$(RESET)"
+	@rm -f pipex
+	@mv bonus/pipex ./
+	@rmdir bonus
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
@@ -75,7 +79,7 @@ clean:
 
 fclean: clean
 	@printf "$(RED)[Cleaning] Binaries and libft...\n$(RESET)"
-	@rm -f $(NAME) $(BONUS_NAME)
+	@rm -rf $(NAME) $(BONUS_NAME) bonus
 	@$(MAKE) -C $(LIBFT_DIR) fclean
 
 re: fclean all

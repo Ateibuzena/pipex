@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: azubieta <azubieta@student.42malaga.com    +#+  +:+       +#+        */
+/*   By: azubieta <azubieta@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:55:10 by azubieta          #+#    #+#             */
-/*   Updated: 2024/11/28 12:39:02 by azubieta         ###   ########.fr       */
+/*   Updated: 2025/06/30 21:56:16 by azubieta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,5 @@ int	main(int argc, char **argv, char **env)
 	ft_waitpid(pipex);
 	status = pipex->status;
 	ft_free_pipex(&pipex);
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
 	return (status);
 }
